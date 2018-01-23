@@ -12,16 +12,39 @@ const contactList = 'contact_list.csv'
 let listContacts = function(){
   let table = new Table({
     head: ['First', 'Last', 'Email'],
-    colWidths: [15, 15, 40],
-    style: {headerAlign: 'left', align: 'left'}})
+    colWidths: [15, 15, 40]})
   let parse = csv.parse
+  let rows = []
   let stream = fs.createReadStream(contactList)
     .pipe(parse({ delimiter : ',' }))
   stream.on('data', function(chunk){
-      console.log(chunk)
-      table.push(chunk)})
+    console.log(chunk)
+    table.push(chunk)})
   stream.on('end', ()=>{
-    console.log(table.render())
+    console.log(table.toString())
+  })
+}
+
+let addContact = function(){
+  let questions = [{
+    type : "input",
+    name : "firstName",
+    message : "Contact's first name: "
+  },{
+    type : "input",
+    name : "lastName",
+    message : "Contact's last name: "
+  },{
+    type : "input",
+    name : "email",
+    message : "Contact's email address: "
+  }]
+
+  inquirer.prompt(questions).then(function (answers) {
+    //console.log(answers)
+    let line = answers.firstName+','+
+      answers.lastName+','+answers.email+'\n'
+    fs.appendFileSync(contactList, line);
   })
 }
 
@@ -43,4 +66,6 @@ inquirer
     console.log(JSON.stringify(answers, null, '  '))
     if(answers.task == LIST_CONTACTS){
       listContacts()
+    }else if (answers.task == ADD_CONTACT){
+      addContact()
     }})
